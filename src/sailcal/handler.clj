@@ -32,18 +32,27 @@
 
 (def dbspec
   (if-let [host (System/getenv "MYSQL_SERVICE_HOST")]
-    {:subprotocol "mysql"
-     :subname (str
-               "//"
-               host
-               ":"
-               (System/getenv "MYSQL_SERVICE_PORT")
-               "/"
-               (System/getenv "SLCAL_SQLDB"))
-     :user (System/getenv "SLCAL_SQLUSR")
-     :password (System/getenv "SLCAL_SQLPWD")
-     }
-    {:subprotocol "mysql"
+    {:connection-uri "mysql://172.30.22.141:3306/mysrsv?user=mystique&password=mystique&useSSL=false"}
+;    {:connection-uri "mysql://172.30.22.141:3306/mysrsv?user=mystique&password=mystique"}
+;    {:connection-uri "jdbc:mysql://172.30.22.141:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true&?enabledTLSProtocols=TLSv1.2"}    
+;    {:subtype "mysql"
+;     :subname (str
+;               "//"
+;               host
+;               ":"
+;               (System/getenv "MYSQL_SERVICE_PORT")
+;               "/"
+;               (System/getenv "SLCAL_SQLDB"))
+;     :user (System/getenv "SLCAL_SQLUSR")
+;     :password (System/getenv "SLCAL_SQLPWD")
+;     :dbname (System/getenv "SLCAL_SQLDB")
+;     }
+;     :verifyServerCertificate false
+;     :useSSL true
+;     :requireSSL true
+;     }
+    {:dbtype "mysql"
+     :dbname (System/getenv "SLCAL_SQLDB")
      :subname (str
                "//localhost:3306/"
                (System/getenv "SLCAL_SQLDB"))
@@ -52,6 +61,9 @@
      }
     ))
 
+; for testing in nREPL
+;(def dbspec {:connection-uri "jdbc:mysql://172.30.22.141:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true"})
+;(jdbc/query dbspec ["select distinct date from reservations where date >= 2022-01-01"])
 
 ;;;
 ;;; MongoDB database of sailing tracks
