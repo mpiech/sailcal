@@ -31,49 +31,33 @@
 ;;; MySQL database spec for OpenShift or local
 
 (def dbspec
-  (if-let [host (System/getenv "MYSQL_SERVICE_HOST")]
-;    {:connection-uri "mysql://172.30.87.81:3306/mysrsv?user=mystique&password=mystique"}
-;    {:connection-uri "mysql://172.30.87.81:3306/mysrsv?user=mystique&password=mystique&useSSL=false"}
-;    {:connection-uri "jdbc:mysql://172.30.32.217:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true&?enabledTLSProtocols=TLSv1.2"}    
-;    {:connection-uri "mysql://172.30.87.81:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true&?enabledTLSProtocols=TLSv1.2"}
-; the below worked with both mysql-connector-java 5.1.40 and 8.0.
-;    {:connection-uri "jdbc:mysql://172.30.32.217:3306/mysrsv?user=mystique&password=mystique&useSSL=false"}
-    {:connection-uri
-     (str 
-      "jdbc:mysql://"
-      host ":"
-      (System/getenv "MYSQL_SERVICE_PORT") "/"
-      (System/getenv "SLCAL_SQLDB")
-      "?user=" (System/getenv "SLCAL_SQLUSR")
-      "&password=" (System/getenv "SLCAL_SQLPWD")
-      "&useSSL=false")
-     }
-;    {:subtype "mysql"
-;     :subname (str
-;               "//"
-;               host
-;               ":"
-;               (System/getenv "MYSQL_SERVICE_PORT")
-;               "/"
-;               (System/getenv "SLCAL_SQLDB"))
-;     :user (System/getenv "SLCAL_SQLUSR")
-;     :password (System/getenv "SLCAL_SQLPWD")
-;     :useSSL "false"
-;     }
-;     :dbname (System/getenv "SLCAL_SQLDB")
-;     :verifyServerCertificate "false"
-;     :useSSL "true"
-;     :requireSSL "true"
-;     :enabledTLSProtocols "TLSv1.2"
-;     }
-    {:dbtype "mysql"
-     :dbname (System/getenv "SLCAL_SQLDB")
-     :subname (str
-               "//localhost:3306/"
-               (System/getenv "SLCAL_SQLDB"))
-     :user (System/getenv "SLCAL_SQLUSR")
-     :password (System/getenv "SLCAL_SQLPWD")
-     }
+  (case (System/getenv "RSVDB")
+    "openshift" {:connection-uri
+                 (str 
+                  "jdbc:mysql://"
+                  host ":"
+                  (System/getenv "MYSQL_SERVICE_PORT") "/"
+                  (System/getenv "SLCAL_SQLDB")
+                  "?user=" (System/getenv "SLCAL_SQLUSR")
+                  "&password=" (System/getenv "SLCAL_SQLPWD")
+                  "&useSSL=false")
+                 }
+    "crunchy" {:dbtype "postgresql"
+               :dbname (System/getenv "PGDB")
+               :host (System/getenv "PGHOST")
+               :user (System/getenv "PGUSER")
+               :password (System/getenv "PGPASSWORD")
+               :ssl true
+               :sslmode "require"
+               }
+    "local" {:dbtype "mysql"
+             :dbname (System/getenv "SLCAL_SQLDB")
+             :subname (str
+                       "//localhost:3306/"
+                       (System/getenv "SLCAL_SQLDB"))
+             :user (System/getenv "SLCAL_SQLUSR")
+             :password (System/getenv "SLCAL_SQLPWD")
+             }
     ))
 
 ; for testing in nREPL
@@ -86,21 +70,35 @@
 
 ;;; Mongo connection and db objects
 
-(def mgconn 
-  (if-let [host (System/getenv "MONGODB_SERVICE_HOST")]
-    (let [port (Integer/parseInt
-                (System/getenv
-                 "MONGODB_SERVICE_PORT"))
-          uname (System/getenv "SLCAL_MGUSR")
-          dbname (System/getenv "SLCAL_MGDB")
-          pwd-raw (System/getenv "SLCAL_MGPWD")
-          pwd (.toCharArray pwd-raw)
-          creds (mcr/create uname dbname pwd)]
-      (mg/connect-with-credentials host port creds))
-    (mg/connect)
+(def mgconn
+  (case (System/getenv "TRKDB")
+    "openshift" (let [host (System/getenv "MONGODB_SERVICE_HOST")
+                      port (Integer/parseInt
+                            (System/getenv "MONGODB_SERVICE_PORT"))
+                      uname (System/getenv "SLCAL_MGUSR")
+                      dbname (System/getenv "SLCAL_MGDB")
+                      pwd-raw (System/getenv "SLCAL_MGPWD")
+                      pwd (.toCharArray pwd-raw)
+                      creds (mcr/create uname dbname pwd)]
+                  (mg/connect-with-credentials host port creds))
+    "local" (mg/connect)
     ))
 
-(def mgdb (mg/get-db mgconn (System/getenv "SLCAL_MGDB")))
+(def mgdb
+  (case (System/getenv "TRKDB")
+    "atlas" (let [atlas-username (System/getenv "ATLAS_USERNAME")
+                  atlas-pwd-raw (System/getenv "ATLAS_PASSWORD")
+                  atlas-password (.toCharArray atlas-pwd-raw)
+                  atlas-host (System/getenv "ATLAS_HOST")
+                  atlas-db (System/getenv "ATLAS_DB")]
+              (:db (mg/connect-via-uri
+                    (str "mongodb+srv://"
+                         atlas-username ":"
+                         atlas-password "@"
+                         atlas-host "/"
+                         atlas-db))))
+    (mg/get-db mgconn (System/getenv "SLCAL_MGDB"))
+    ))
 
 
 ;;;
