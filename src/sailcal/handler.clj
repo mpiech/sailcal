@@ -35,7 +35,7 @@
     "openshift" {:connection-uri
                  (str 
                   "jdbc:mysql://"
-                  host ":"
+                  (System/getenv "MYSQL_SERVICE_HOST") ":"
                   (System/getenv "MYSQL_SERVICE_PORT") "/"
                   (System/getenv "SLCAL_SQLDB")
                   "?user=" (System/getenv "SLCAL_SQLUSR")
@@ -60,9 +60,6 @@
              }
     ))
 
-; for testing in nREPL
-;(def dbspec {:connection-uri "jdbc:mysql://172.30.22.141:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true"})
-;(jdbc/query dbspec ["select distinct date from reservations where date >= 2022-01-01"])
 
 ;;;
 ;;; MongoDB database of sailing tracks
@@ -82,13 +79,13 @@
                       creds (mcr/create uname dbname pwd)]
                   (mg/connect-with-credentials host port creds))
     "local" (mg/connect)
+    "atlas" nil
     ))
 
 (def mgdb
   (case (System/getenv "TRKDB")
     "atlas" (let [atlas-username (System/getenv "ATLAS_USERNAME")
-                  atlas-pwd-raw (System/getenv "ATLAS_PASSWORD")
-                  atlas-password (.toCharArray atlas-pwd-raw)
+                  atlas-password (System/getenv "ATLAS_PASSWORD")
                   atlas-host (System/getenv "ATLAS_HOST")
                   atlas-db (System/getenv "ATLAS_DB")]
               (:db (mg/connect-via-uri
