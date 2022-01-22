@@ -23,11 +23,12 @@
    ;https://github.com/clojure/java.jdbc
    [org.clojure/java.jdbc "0.7.12"]
    ;http://dev.mysql.com/downloads/connector/j/
-;   [mysql/mysql-connector-java "8.0.28"]
-   [mysql/mysql-connector-java "5.1.40"]
+   [mysql/mysql-connector-java "8.0.28"]
    ;https://github.com/michaelklishin/monger
    [com.novemberain/monger "3.5.0"]
-                 ]
+   ;https://github.com/remodoy/clj-postgresql
+   [org.postgresql/postgresql "42.3.1"]
+   ]
   :plugins [[lein-ring "0.12.6"]
             [cider/cider-nrepl "0.27.3"]]
   :ring {:handler sailcal.handler/app

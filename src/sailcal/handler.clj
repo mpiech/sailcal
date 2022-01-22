@@ -34,24 +34,38 @@
   (if-let [host (System/getenv "MYSQL_SERVICE_HOST")]
 ;    {:connection-uri "mysql://172.30.87.81:3306/mysrsv?user=mystique&password=mystique"}
 ;    {:connection-uri "mysql://172.30.87.81:3306/mysrsv?user=mystique&password=mystique&useSSL=false"}
+;    {:connection-uri "jdbc:mysql://172.30.32.217:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true&?enabledTLSProtocols=TLSv1.2"}    
 ;    {:connection-uri "mysql://172.30.87.81:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true&?enabledTLSProtocols=TLSv1.2"}
-;    {:connection-uri "jdbc:mysql://172.30.22.141:3306/mysrsv?user=mystique&password=mystique&verifyServerCertificate=false&useSSL=true&requireSSL=true&?enabledTLSProtocols=TLSv1.2"}    
-    {:subtype "mysql"
-     :subname (str
-               "//"
-               host
-               ":"
-               (System/getenv "MYSQL_SERVICE_PORT")
-               "/"
-               (System/getenv "SLCAL_SQLDB"))
-     :user (System/getenv "SLCAL_SQLUSR")
-     :password (System/getenv "SLCAL_SQLPWD")
-     :dbname (System/getenv "SLCAL_SQLDB")
-;     }
-     :verifyServerCertificate "false"
-     :useSSL "true"
-     :requireSSL "true"
+; the below worked with both mysql-connector-java 5.1.40 and 8.0.
+;    {:connection-uri "jdbc:mysql://172.30.32.217:3306/mysrsv?user=mystique&password=mystique&useSSL=false"}
+    {:connection-uri
+     (str 
+      "jdbc:mysql://"
+      host ":"
+      (System/getenv "MYSQL_SERVICE_PORT") "/"
+      (System/getenv "SLCAL_SQLDB")
+      "?user=" (System/getenv "SLCAL_SQLUSR")
+      "&password=" (System/getenv "SLCAL_SQLPWD")
+      "&useSSL=false")
      }
+;    {:subtype "mysql"
+;     :subname (str
+;               "//"
+;               host
+;               ":"
+;               (System/getenv "MYSQL_SERVICE_PORT")
+;               "/"
+;               (System/getenv "SLCAL_SQLDB"))
+;     :user (System/getenv "SLCAL_SQLUSR")
+;     :password (System/getenv "SLCAL_SQLPWD")
+;     :useSSL "false"
+;     }
+;     :dbname (System/getenv "SLCAL_SQLDB")
+;     :verifyServerCertificate "false"
+;     :useSSL "true"
+;     :requireSSL "true"
+;     :enabledTLSProtocols "TLSv1.2"
+;     }
     {:dbtype "mysql"
      :dbname (System/getenv "SLCAL_SQLDB")
      :subname (str
