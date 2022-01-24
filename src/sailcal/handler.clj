@@ -21,7 +21,7 @@
 ;;; Static parameters
 ;;;
 
-(def timezone "America/Los_Angeles")
+(def loc-timezone "America/Los_Angeles")
 (def gmaps-key (System/getenv "GMAPS_KEY"))
 
 ;;;
@@ -105,7 +105,7 @@
 (defn sqldtobj-to-dtobj [sqldtobj]
   (time/to-time-zone
    (ctime/from-sql-time sqldtobj)
-   (time/time-zone-for-id timezone)))
+   (time/time-zone-for-id loc-timezone)))
 
 
 ;;;
@@ -129,12 +129,17 @@
                     ])))
 
 ; sailing tracks from MongoDB
-; fix to filter date >= datestr; currently returns all tracks ever
 
 (defn trdb-read-dtobjs [coll start-dtstr end-dtstr]
   (map (fn [x] (:date x))
-       (mc/find-maps mgdb coll))
+       (mc/find-maps mgdb coll {:date
+                                {$gt start-dtstr
+                                 $lt end-dtstr}})
+       )
   )
+
+; for debugging in nREPL
+; (trdb-read-dtobjs "tracks" "2021-10-01" "2021-12-31")
 
 ;;;
 ;;; Enlive - Clojure HTML templating
