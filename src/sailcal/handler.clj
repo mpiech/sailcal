@@ -94,7 +94,7 @@
                          atlas-password "@"
                          atlas-host "/"
                          atlas-db))))
-    (mg/get-db mgconn (System/getenv "SLCAL_MGDB"))
+    (mg/get-db mgconn (System/getenv "ATLAS_DB"))
     ))
 
 

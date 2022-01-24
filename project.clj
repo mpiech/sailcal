@@ -1,5 +1,5 @@
 (defproject sailcal "2.1.1"
-  :description "Sailing Calendar"
+  :description "Sailboat Reservation and Tracks Calendar"
   :url "http://piech.io"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
