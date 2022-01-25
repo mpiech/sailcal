@@ -118,7 +118,7 @@
 ; reservations and other 'events' from SQL database
 
 (defn db-read-dtobjs [table start-dtstr end-dtstr]
-  (let [qstr (if (= dbtype "mysql")
+  (let [qstr (if (= rsvdbtype "mysql")
                (str
                 "SELECT DISTINCT res_date "
                 "FROM " table
