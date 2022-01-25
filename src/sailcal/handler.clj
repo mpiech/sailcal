@@ -28,10 +28,13 @@
 ;;; SQL database of reservations
 ;;;
 
-;;; MySQL database spec for OpenShift or local
+;;; MySQL database specs for OpenShift, Crunchy Bridge, or local
+
+(def rsvdb (System/getenv "RSVDB"))
+(def rsvdbtype (if (= rsvdb "crunchy") "postgresql" "mysql"))
 
 (def dbspec
-  (case (System/getenv "RSVDB")
+  (case rsvdb
     "openshift" {:connection-uri
                  (str 
                   "jdbc:mysql://"
@@ -115,26 +118,33 @@
 ; reservations and other 'events' from SQL database
 
 (defn db-read-dtobjs [table start-dtstr end-dtstr]
-  (map (fn [x]
-         (sqldtobj-to-dtobj (:date x)))
-       (jdbc/query dbspec
-                   [(str
-                     "SELECT DISTINCT date "
-                     "FROM " table
-                     " WHERE date >= \""
-                     start-dtstr
-                     "\" AND date <= \""
-                     end-dtstr "\""
-                     )
-                    ])))
+  (let [qstr (if (= dbtype "mysql")
+               (str
+                "SELECT DISTINCT res_date "
+                "FROM " table
+                " WHERE res_date >= \""
+                start-dtstr
+                "\" AND res_date <= \""
+                end-dtstr "\"")
+               (str
+                "SELECT DISTINCT res_date "
+                "FROM " table
+                " WHERE CAST (res_date AS TIMESTAMP) >= "
+                "CAST ('" start-dtstr "' AS TIMESTAMP) "
+                "AND CAST (res_date AS TIMESTAMP) <= "
+                "CAST ('" end-dtstr "' AS TIMESTAMP)"))]
+    (map (fn [x]
+           (sqldtobj-to-dtobj (:res_date x)))
+         (jdbc/query dbspec [qstr]))
+    ))
 
 ; sailing tracks from MongoDB
 
 (defn trdb-read-dtobjs [coll start-dtstr end-dtstr]
   (map (fn [x] (:date x))
        (mc/find-maps mgdb coll {:date
-                                {$gt start-dtstr
-                                 $lt end-dtstr}})
+                                {$gte start-dtstr
+                                 $lte end-dtstr}})
        )
   )
 
@@ -147,7 +157,7 @@
 
 ;;; for index, simply show index.html with vars replaced
 
-(enlive/deftemplate index "sailcal/index.html"
+(enlive/deftemplate index "sailcal/index.html.enlive"
   []
   [:#gmap] (enlive/replace-vars {:gmapskey gmaps-key})
   )
