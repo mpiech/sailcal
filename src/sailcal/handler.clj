@@ -56,7 +56,7 @@
                }
     "cockroach" {:connection-uri
                  (str 
-                  "postgresql://"
+                  "jdbc:postgresql://"
                   (System/getenv "COCKROACH_HOST") ":"
                   (System/getenv "COCKROACH_PORT") "/"
                   (System/getenv "SLCAL_SQLDB")
