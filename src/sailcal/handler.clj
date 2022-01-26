@@ -28,10 +28,11 @@
 ;;; SQL database of reservations
 ;;;
 
-;;; MySQL database specs for OpenShift, Crunchy Bridge, or local
-
 (def rsvdb (System/getenv "RSVDB"))
-(def rsvdbtype (if (= rsvdb "crunchy") "postgresql" "mysql"))
+(def rsvdbtype (if (or (= rsvdb "crunchy")
+                       (= rsvdb "cockroach"))
+                 "postgresql"
+                 "mysql"))
 
 (def dbspec
   (case rsvdb
@@ -46,13 +47,21 @@
                   "&useSSL=false")
                  }
     "crunchy" {:dbtype "postgresql"
-               :dbname (System/getenv "PGDB")
+               :dbname (System/getenv "SLCAL_SQLDB")
                :host (System/getenv "PGHOST")
                :user (System/getenv "PGUSER")
                :password (System/getenv "PGPASSWORD")
                :ssl true
                :sslmode "require"
                }
+    "cockroach" {:connection-uri
+                 (str 
+                  "postgresql://"
+                  (System/getenv "COCKROACH_HOST") ":"
+                  (System/getenv "COCKROACH_PORT") "/"
+                  (System/getenv "SLCAL_SQLDB")
+                  (System/getenv "COCKROACH_OPTIONS"))
+                 }
     "local" {:dbtype "mysql"
              :dbname (System/getenv "SLCAL_SQLDB")
              :subname (str
