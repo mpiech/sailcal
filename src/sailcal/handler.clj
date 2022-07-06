@@ -54,14 +54,19 @@
                :ssl true
                :sslmode "require"
                }
-    "cockroach" {:connection-uri
+    "clockroach" {:connection-uri
                  (str 
                   "jdbc:postgresql://"
                   (System/getenv "COCKROACH_HOST") ":"
                   (System/getenv "COCKROACH_PORT") "/"
                   (System/getenv "SLCAL_SQLDB")
-                  (System/getenv "COCKROACH_OPTIONS"))
+                  "?user=" (System/getenv "COCKROACH_USR")
+                  "&password=" (System/getenv "COCKROACH_PWD")
+                  "&options=" (System/getenv "COCKROACH_OPTIONS")
+                  )
                  }
+    "cockroach" {:connection-uri
+                  "jdbc:postgresql://free-tier4.aws-us-west-2.cockroachlabs.cloud:26257/mysrsv?options=--cluster%3Dlanky-quokka-3318&sslmode=require&user=mystique&password=KQDgHkQJMcjLvA4ARaVpXg"}
     "local" {:dbtype "mysql"
              :dbname (System/getenv "SLCAL_SQLDB")
              :subname (str
@@ -197,7 +202,8 @@
 
 (defn handler-get-events [params]
   (let [start (get params "start" "2021-12-01")
-        end (get params "end" "2021-12-31")]
+        end (get params "end" "2021-12-31")
+        dummy (Class/forName "org.postgresql.Driver")]
     (json/write-str
      (concat
       (map (fn [x]

@@ -27,7 +27,9 @@
    ;https://github.com/michaelklishin/monger
    [com.novemberain/monger "3.5.0"]
    ;https://github.com/remodoy/clj-postgresql
-   [org.postgresql/postgresql "42.3.1"]
+   ;[org.postgresql/postgresql "42.3.1"]
+   ;[clj-postgresql "0.7.0"]
+   [org.postgresql/postgresql "42.4.0"]
    ]
   :plugins [[lein-ring "0.12.6"]
             [cider/cider-nrepl "0.27.3"]]
