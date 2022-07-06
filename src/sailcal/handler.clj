@@ -54,7 +54,7 @@
                :ssl true
                :sslmode "require"
                }
-    "clockroach" {:connection-uri
+    "cockroach" {:connection-uri
                  (str 
                   "jdbc:postgresql://"
                   (System/getenv "COCKROACH_HOST") ":"
@@ -65,8 +65,6 @@
                   "&options=" (System/getenv "COCKROACH_OPTIONS")
                   )
                  }
-    "cockroach" {:connection-uri
-                  "jdbc:postgresql://free-tier4.aws-us-west-2.cockroachlabs.cloud:26257/mysrsv?options=--cluster%3Dlanky-quokka-3318&sslmode=require&user=mystique&password=KQDgHkQJMcjLvA4ARaVpXg"}
     "local" {:dbtype "mysql"
              :dbname (System/getenv "SLCAL_SQLDB")
              :subname (str
